@@ -1,0 +1,37 @@
+
+enum Role {
+    ADMIN
+    USER
+    ENTERPRISE
+}
+
+type User {
+    id: String!
+    role: Role!
+    name: String!
+    lastname: String!
+    ir: String!
+    email: String!
+    password: String!
+    enterpriseName: String
+    nrle: String
+    projects: [String!]
+    createdAt: String!
+    updatedAt: String
+}
+
+
+
+type Query {
+    getUsers: [User]
+    getUser(id: String!): User!
+    getUserByEmail(email: String!): User!
+    getUserByIR(ir: String!): User!
+    getUserByProject(project: String!): User!
+}
+
+type Mutation {
+    newUser(role:Role!, name: String!, lastname: String!, ir: String!, email: String!, password: String!, passwordConfirmation:String!, enterpriseName: String, nrle: String): String!
+    updateUser(id: String!, name: String, lastname: String, ir: String, email: String, password: String, passwordConfirmation:String,enterpriseName:String, nrle: String): String!
+    deleteUser(id: String!,ir: String!, nrle: String ,password:String!, passwordConfirmation:String!): String!
+}

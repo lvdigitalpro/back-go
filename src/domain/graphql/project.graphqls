@@ -1,0 +1,61 @@
+enum Status{
+    QUEUE
+    IN_REVIEW
+    IN_PROGRESS
+    FINISHED
+}
+
+enum Type {
+    WEB
+    MOBILE
+    DESKTOP
+    SYSTEM
+    UI_UX
+    OTHER
+}
+
+type Project {
+    id: String!
+    type: Type!
+    owner: User!
+    name: String!
+    description: String!
+    tasks: [Tasks!]
+    status: Status!
+    createdAt: String!
+    updatedAt: String!
+    startDate: String!
+    endDate: String!
+}
+
+enum TypeTask{
+    SEARCH
+    DESIGN
+    DEVELOPMENT
+    TEST
+    OTHER
+}
+type Tasks {
+    id: String!
+    type: TypeTask!
+    name: String!
+    description: String!
+    status: String!
+    owner: User!
+    createdAt: String!
+    updatedAt: String!
+}
+
+extend type Query {
+    projects: [Project!]
+    project(id: String!): Project!
+}
+
+extend type Mutation {
+    newProject(type: Type!, name: String!, description: String!, startDate: String!, endDate: String!): String!
+    updateProject(id: String!, type: Type!, name: String!, description: String!, startDate: String!, endDate: String!): String!
+    deleteProject(id: String!): String!
+    newTask(projectId: String!, type: TypeTask!, name: String!, description: String!): String!
+    updateTask(id: String!, type: TypeTask!, name: String!, description: String!): String!
+    deleteTask(id: String!): String!
+}
