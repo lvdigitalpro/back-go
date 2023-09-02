@@ -6,50 +6,114 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/lvdigitalpro/back/src/domain/entities"
 	"github.com/lvdigitalpro/back/src/graph"
 )
 
 // NewUser is the resolver for the newUser field.
-func (r *mutationResolver) NewUser(ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (string, error) {
-	panic(fmt.Errorf("not implemented: NewUser - newUser"))
+func (r *mutationResolver) NewUser(
+	ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
+	passwordConfirmation string, enterpriseName *string, nrle *string,
+) (string, error) {
+	exec, err := r.UserService.NewUser(
+		ctx, role, name, lastname, ir, email, password,
+		passwordConfirmation,
+		enterpriseName, nrle,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, id string, name *string, lastname *string, ir *string, email *string, password *string, passwordConfirmation *string, enterpriseName *string, nrle *string) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+func (r *mutationResolver) UpdateUser(
+	ctx context.Context, id string, name *string, lastname *string, ir *string, email *string, password *string,
+	passwordConfirmation *string, enterpriseName *string, nrle *string,
+) (string, error) {
+	exec, err := r.UserService.UpdateUser(
+		ctx, id, *name, *lastname, *ir, *email, *password, *passwordConfirmation,
+		enterpriseName, nrle,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string) (string, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+func (r *mutationResolver) DeleteUser(
+	ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
+) (string, error) {
+	exec, err := r.UserService.DeleteUser(
+		ctx, id, ir, nrle, password, passwordConfirmation,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
 }
 
 // GetUsers is the resolver for the getUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context) ([]*entities.User, error) {
-	panic(fmt.Errorf("not implemented: GetUsers - getUsers"))
+	exec, err := r.UserService.GetUsers(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exec, nil
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*entities.User, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+	exec, err := r.UserService.GetUser(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exec, nil
 }
 
 // GetUserByEmail is the resolver for the getUserByEmail field.
 func (r *queryResolver) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
-	panic(fmt.Errorf("not implemented: GetUserByEmail - getUserByEmail"))
+	exec, err := r.UserService.GetUserByEmail(ctx, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exec, nil
 }
 
 // GetUserByIr is the resolver for the getUserByIR field.
 func (r *queryResolver) GetUserByIr(ctx context.Context, ir string) (*entities.User, error) {
-	panic(fmt.Errorf("not implemented: GetUserByIr - getUserByIR"))
+	exec, err := r.UserService.GetUserByIr(ctx, ir)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exec, nil
 }
 
 // GetUserByProject is the resolver for the getUserByProject field.
 func (r *queryResolver) GetUserByProject(ctx context.Context, project string) (*entities.User, error) {
-	panic(fmt.Errorf("not implemented: GetUserByProject - getUserByProject"))
+
+	exec, err := r.UserService.GetUserByProject(ctx, project)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exec, nil
 }
 
 // Mutation returns graph.MutationResolver implementation.
@@ -67,12 +131,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *mutationResolver) NewUserEnterprise(ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (string, error) {
-	panic(fmt.Errorf("not implemented: NewUserEnterprise - newUserEnterprise"))
-}
-func (r *mutationResolver) Hello(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Hello - hello"))
-}
-func (r *queryResolver) Hello(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Hello - hello"))
-}

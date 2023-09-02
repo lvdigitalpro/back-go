@@ -2,7 +2,7 @@ enum Status{
     QUEUE
     IN_REVIEW
     IN_PROGRESS
-    FINISHED
+    DONE
 }
 
 enum Type {
@@ -24,8 +24,8 @@ type Project {
     status: Status!
     createdAt: String!
     updatedAt: String!
-    startDate: String!
-    endDate: String!
+    startDate: String
+    endDate: String
 }
 
 enum TypeTask{
@@ -43,7 +43,7 @@ type Tasks {
     status: String!
     owner: User!
     createdAt: String!
-    updatedAt: String!
+    updatedAt: String
 }
 
 extend type Query {

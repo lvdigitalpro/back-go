@@ -2,13 +2,23 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/lvdigitalpro/back/src/data/contracts"
+	"github.com/lvdigitalpro/back/src/domain/entities"
 )
 
 type IUserService interface {
-	NewUser(ctx context.Context, role string, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (*string, error)
-	UpdateUser(ctx context.Context, id string, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (*string, error)
-	DeleteUser(ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string) (*string, error)
+	NewUser(
+		ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
+		passwordConfirmation string, enterpriseName *string, nrle *string,
+	) (*string, error)
+	UpdateUser(
+		ctx context.Context, id string, name string, lastname string, ir string, email string, password string,
+		passwordConfirmation string, enterpriseName *string, nrle *string,
+	) (*string, error)
+	DeleteUser(
+		ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
+	) (*string, error)
 	GetUsers(ctx context.Context) ([]*contracts.UserContract, error)
 	GetUser(ctx context.Context, id string) (*contracts.UserContract, error)
 	GetUserByEmail(ctx context.Context, email string) (*contracts.UserContract, error)
@@ -25,18 +35,36 @@ func NewUserService(repo contracts.IUsersRepository) IUserService {
 	return &UserService{Repo: repo}
 }
 
-func (s *UserService) NewUser(ctx context.Context, role string, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (*string, error) {
+func (s *UserService) NewUser(
+	ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
+	passwordConfirmation string, enterpriseName *string, nrle *string,
+) (*string, error) {
 
-	exec, err := s.Repo.NewUser(ctx, role, name, lastname, ir, email, password, passwordConfirmation, enterpriseName, nrle)
+	user := contracts.UserContract{}
+
+	newUser, err := user.NewUser(role, name, lastname, ir, email, password, passwordConfirmation, enterpriseName, nrle)
+	if err != nil {
+		return nil, err
+	}
+	exec, err := s.Repo.NewUser(ctx, *newUser)
 	if err != nil {
 		return nil, err
 	}
 	return exec, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id string, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (*string, error) {
+func (s *UserService) UpdateUser(
+	ctx context.Context, id string, name string, lastname string, ir string, email string, password string,
+	passwordConfirmation string, enterpriseName *string, nrle *string,
+) (*string, error) {
 
-	exec, err := s.Repo.UpdateUser(ctx, id, name, lastname, ir, email, password, passwordConfirmation, enterpriseName, nrle)
+	if password != passwordConfirmation {
+		return nil, errors.New("passwords do not match")
+	}
+
+	exec, err := s.Repo.UpdateUser(
+		ctx, id, name, lastname, ir, email, password, enterpriseName, nrle,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +72,15 @@ func (s *UserService) UpdateUser(ctx context.Context, id string, name string, la
 	return exec, nil
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string) (*string, error) {
+func (s *UserService) DeleteUser(
+	ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
+) (*string, error) {
 
-	exec, err := s.Repo.DeleteUser(ctx, id, ir, nrle, password, passwordConfirmation)
+	if password != passwordConfirmation {
+		return nil, errors.New("passwords do not match")
+	}
+
+	exec, err := s.Repo.DeleteUser(ctx, id, ir, nrle, password)
 	if err != nil {
 		return nil, err
 	}

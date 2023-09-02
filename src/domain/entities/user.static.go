@@ -3,7 +3,9 @@ package entities
 import (
 	"errors"
 	"github.com/dgryski/trifles/uuid"
+	"github.com/golang-module/carbon/v2"
 	"github.com/lvdigitalpro/back/src/domain/utils"
+	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
@@ -60,19 +62,29 @@ func (r *User) AssignUser(user User) {
 	r.Projects = user.Projects
 }
 
-func (r *User) NewUser(role Role, name string, lastname string, ir string, email string, password string, passwordConfirmation string, enterpriseName *string, nrle *string) (*User, error) {
+func (r *User) NewUser(
+	role Role, name string, lastname string, ir string, email string, password string,
+	passwordConfirmation string, enterpriseName *string, nrle *string,
+) (*User, error) {
 
 	if password != passwordConfirmation {
 		return nil, errors.New("passwords do not match")
 	}
 
+	newPassword, err := bcrypt.GenerateFromPassword([]byte(strings.TrimSpace(password)), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	date := carbon.Now().ToIso8601String()
 	r.ID = uuid.UUIDv4()
 	r.Role = role
 	r.Name = strings.TrimSpace(name)
 	r.Lastname = strings.TrimSpace(lastname)
 	r.Ir = strings.TrimSpace(ir)
 	r.Email = strings.TrimSpace(email)
-	r.Password = strings.TrimSpace(password)
+	r.Password = string(newPassword)
+	r.CreatedAt = date
+	r.UpdatedAt = &date
 
 	if role == RoleEnterprise {
 		r.EnterpriseName = enterpriseName
