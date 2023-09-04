@@ -3,27 +3,25 @@ package services
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/lvdigitalpro/back/src/data/contracts"
-	"github.com/lvdigitalpro/back/src/domain/entities"
+	"github.com/lvdigitalpro/back/src/domain/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type IUserService interface {
 	NewUser(
-		ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
-		passwordConfirmation string, enterpriseName *string, nrle *string,
+		ctx context.Context, input contracts.InputNewUserContract,
 	) (*string, error)
 	UpdateUser(
-		ctx context.Context, id string, name string, lastname string, ir string, email string, password string,
-		passwordConfirmation string, enterpriseName *string, nrle *string,
-	) (*string, error)
-	DeleteUser(
-		ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
+		ctx context.Context, input contracts.InputUpdateUserContract,
 	) (*string, error)
 	GetUsers(ctx context.Context) ([]*contracts.UserContract, error)
-	GetUser(ctx context.Context, id string) (*contracts.UserContract, error)
+	GetUser(ctx context.Context, user_id string) (*contracts.UserContract, error)
 	GetUserByEmail(ctx context.Context, email string) (*contracts.UserContract, error)
 	GetUserByIr(ctx context.Context, ir string) (*contracts.UserContract, error)
-	GetUserByProject(ctx context.Context, project string) (*contracts.UserContract, error)
+	GetUserByProject(ctx context.Context, cod_project int) (*contracts.UserContract, error)
 }
 
 type UserService struct {
@@ -36,17 +34,44 @@ func NewUserService(repo contracts.IUsersRepository) IUserService {
 }
 
 func (s *UserService) NewUser(
-	ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
-	passwordConfirmation string, enterpriseName *string, nrle *string,
+	ctx context.Context, input contracts.InputNewUserContract,
 ) (*string, error) {
 
-	user := contracts.UserContract{}
+	input.Name = strings.TrimSpace(input.Name)
+	input.LastName = strings.TrimSpace(input.LastName)
+	input.Email = strings.TrimSpace(input.Email)
+	input.Password = strings.TrimSpace(input.Password)
+	input.PasswordConfirmation = strings.TrimSpace(input.PasswordConfirmation)
+	input.Ir = strings.TrimSpace(input.Ir)
+	if input.Nrle != nil {
+		*input.Nrle = strings.TrimSpace(*input.Nrle)
+	}
 
-	newUser, err := user.NewUser(role, name, lastname, ir, email, password, passwordConfirmation, enterpriseName, nrle)
+	if input.Password != input.PasswordConfirmation {
+		return nil, errors.New("passwords do not match")
+	}
+
+	isIrValid := utils.IsCPF(input.Ir)
+	if !isIrValid {
+		return nil, errors.New("invalid IR")
+	}
+
+	if input.Nrle != nil {
+		isNrleValid := utils.IsCNPJ(*input.Nrle)
+		if !isNrleValid {
+			return nil, errors.New("invalid NRLE")
+		}
+	}
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
-	exec, err := s.Repo.NewUser(ctx, *newUser)
+
+	input.Password = string(hashPassword)
+	exec, err := s.Repo.NewUser(
+		ctx, input,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -54,33 +79,45 @@ func (s *UserService) NewUser(
 }
 
 func (s *UserService) UpdateUser(
-	ctx context.Context, id string, name string, lastname string, ir string, email string, password string,
-	passwordConfirmation string, enterpriseName *string, nrle *string,
+	ctx context.Context, input contracts.InputUpdateUserContract,
 ) (*string, error) {
 
-	if password != passwordConfirmation {
+	input.Name = strings.TrimSpace(input.Name)
+	input.LastName = strings.TrimSpace(input.LastName)
+	input.Email = strings.TrimSpace(input.Email)
+	input.Password = strings.TrimSpace(input.Password)
+	input.PasswordConfirmation = strings.TrimSpace(input.PasswordConfirmation)
+	input.Ir = strings.TrimSpace(input.Ir)
+
+	if input.Nrle != nil {
+		*input.Nrle = strings.TrimSpace(*input.Nrle)
+	}
+
+	if input.Password != input.PasswordConfirmation {
 		return nil, errors.New("passwords do not match")
 	}
 
-	exec, err := s.Repo.UpdateUser(
-		ctx, id, name, lastname, ir, email, password, enterpriseName, nrle,
-	)
+	isIrValid := utils.IsCPF(input.Ir)
+	if !isIrValid {
+		return nil, errors.New("invalid IR")
+	}
+
+	if input.Nrle != nil {
+		isNrleValid := utils.IsCNPJ(*input.Nrle)
+		if !isNrleValid {
+			return nil, errors.New("invalid NRLE")
+		}
+	}
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 
-	return exec, nil
-}
-
-func (s *UserService) DeleteUser(
-	ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
-) (*string, error) {
-
-	if password != passwordConfirmation {
-		return nil, errors.New("passwords do not match")
-	}
-
-	exec, err := s.Repo.DeleteUser(ctx, id, ir, nrle, password)
+	input.Password = string(hashPassword)
+	exec, err := s.Repo.UpdateUser(
+		ctx, input,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -124,9 +161,9 @@ func (s *UserService) GetUserByIr(ctx context.Context, ir string) (*contracts.Us
 	return exec, nil
 }
 
-func (s *UserService) GetUserByProject(ctx context.Context, project string) (*contracts.UserContract, error) {
+func (s *UserService) GetUserByProject(ctx context.Context, cod_project int) (*contracts.UserContract, error) {
 
-	exec, err := s.Repo.GetUserByProject(ctx, project)
+	exec, err := s.Repo.GetUserByProject(ctx, cod_project)
 	if err != nil {
 		return nil, err
 	}

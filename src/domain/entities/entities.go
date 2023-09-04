@@ -8,87 +8,82 @@ import (
 	"strconv"
 )
 
-type Project struct {
-	ID          string   `json:"id"`
-	Type        Type     `json:"type"`
-	Owner       *User    `json:"owner"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Tasks       []*Tasks `json:"tasks,omitempty"`
-	Status      Status   `json:"status"`
-	CreatedAt   string   `json:"createdAt"`
-	UpdatedAt   string   `json:"updatedAt"`
-	StartDate   string   `json:"startDate"`
-	EndDate     string   `json:"endDate"`
+type InputDeleteProject struct {
+	CodProject           int    `json:"cod_project"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"password_confirmation"`
 }
 
-type Tasks struct {
-	ID          string   `json:"id"`
-	Type        TypeTask `json:"type"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Status      string   `json:"status"`
-	Owner       *User    `json:"owner"`
-	CreatedAt   string   `json:"createdAt"`
-	UpdatedAt   string   `json:"updatedAt"`
+type InputNewProject struct {
+	Type        Type   `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	UserID      string `json:"user_id"`
+}
+
+type InputNewUser struct {
+	Name                 string  `json:"name"`
+	LastName             string  `json:"last_name"`
+	BirthDate            string  `json:"birth_date"`
+	Email                string  `json:"email"`
+	Password             string  `json:"password"`
+	PasswordConfirmation string  `json:"password_confirmation"`
+	Type                 int     `json:"type"`
+	Ir                   string  `json:"ir"`
+	Nrle                 *string `json:"nrle,omitempty"`
+	EnterpriseName       *string `json:"enterpriseName,omitempty"`
+}
+
+type InputUpdateProject struct {
+	Type        Type   `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	UserID      string `json:"user_id"`
+}
+
+type InputUpdateUser struct {
+	UserID               string  `json:"user_id"`
+	Name                 string  `json:"name"`
+	LastName             string  `json:"last_name"`
+	BirthDate            string  `json:"birth_date"`
+	Email                string  `json:"email"`
+	Password             string  `json:"password"`
+	PasswordConfirmation string  `json:"password_confirmation"`
+	Type                 int     `json:"type"`
+	Ir                   string  `json:"ir"`
+	CreatedAt            string  `json:"created_at"`
+	Nrle                 *string `json:"nrle,omitempty"`
+	EnterpriseName       *string `json:"enterpriseName,omitempty"`
+	OldPassword          *string `json:"old_password,omitempty"`
+}
+
+type Project struct {
+	CodProject  int     `json:"cod_project"`
+	Type        Type    `json:"type"`
+	Status      Status  `json:"status"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   *string `json:"updated_at,omitempty"`
+	StartDate   *string `json:"start_date,omitempty"`
+	EndDate     *string `json:"end_date,omitempty"`
+	UserID      string  `json:"user_id"`
 }
 
 type User struct {
-	ID             string   `json:"id"`
-	Role           Role     `json:"role"`
-	Name           string   `json:"name"`
-	Lastname       string   `json:"lastname"`
-	Ir             string   `json:"ir"`
-	Email          string   `json:"email"`
-	Password       string   `json:"password"`
-	EnterpriseName *string  `json:"enterpriseName,omitempty"`
-	Nrle           *string  `json:"nrle,omitempty"`
-	Projects       []string `json:"projects,omitempty"`
-	CreatedAt      string   `json:"createdAt"`
-	UpdatedAt      *string  `json:"updatedAt,omitempty"`
-}
-
-type Role string
-
-const (
-	RoleAdmin      Role = "ADMIN"
-	RoleUser       Role = "USER"
-	RoleEnterprise Role = "ENTERPRISE"
-)
-
-var AllRole = []Role{
-	RoleAdmin,
-	RoleUser,
-	RoleEnterprise,
-}
-
-func (e Role) IsValid() bool {
-	switch e {
-	case RoleAdmin, RoleUser, RoleEnterprise:
-		return true
-	}
-	return false
-}
-
-func (e Role) String() string {
-	return string(e)
-}
-
-func (e *Role) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Role(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Role", str)
-	}
-	return nil
-}
-
-func (e Role) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	UserID         string  `json:"user_id"`
+	Name           string  `json:"name"`
+	LastName       string  `json:"last_name"`
+	BirthDate      string  `json:"birth_date"`
+	Email          string  `json:"email"`
+	Password       string  `json:"password"`
+	CreatedAt      string  `json:"createdAt"`
+	UpdatedAt      *string `json:"updatedAt,omitempty"`
+	Type           int     `json:"type"`
+	Ir             string  `json:"ir"`
+	Nrle           *string `json:"nrle,omitempty"`
+	EnterpriseName *string `json:"enterpriseName,omitempty"`
+	CodProject     *int    `json:"cod_project,omitempty"`
 }
 
 type Status string
@@ -97,19 +92,19 @@ const (
 	StatusQueue      Status = "QUEUE"
 	StatusInReview   Status = "IN_REVIEW"
 	StatusInProgress Status = "IN_PROGRESS"
-	StatusFinished   Status = "FINISHED"
+	StatusDone       Status = "DONE"
 )
 
 var AllStatus = []Status{
 	StatusQueue,
 	StatusInReview,
 	StatusInProgress,
-	StatusFinished,
+	StatusDone,
 }
 
 func (e Status) IsValid() bool {
 	switch e {
-	case StatusQueue, StatusInReview, StatusInProgress, StatusFinished:
+	case StatusQueue, StatusInReview, StatusInProgress, StatusDone:
 		return true
 	}
 	return false
@@ -182,52 +177,5 @@ func (e *Type) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Type) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TypeTask string
-
-const (
-	TypeTaskSearch      TypeTask = "SEARCH"
-	TypeTaskDesign      TypeTask = "DESIGN"
-	TypeTaskDevelopment TypeTask = "DEVELOPMENT"
-	TypeTaskTest        TypeTask = "TEST"
-	TypeTaskOther       TypeTask = "OTHER"
-)
-
-var AllTypeTask = []TypeTask{
-	TypeTaskSearch,
-	TypeTaskDesign,
-	TypeTaskDevelopment,
-	TypeTaskTest,
-	TypeTaskOther,
-}
-
-func (e TypeTask) IsValid() bool {
-	switch e {
-	case TypeTaskSearch, TypeTaskDesign, TypeTaskDevelopment, TypeTaskTest, TypeTaskOther:
-		return true
-	}
-	return false
-}
-
-func (e TypeTask) String() string {
-	return string(e)
-}
-
-func (e *TypeTask) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TypeTask(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TypeTask", str)
-	}
-	return nil
-}
-
-func (e TypeTask) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

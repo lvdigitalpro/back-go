@@ -12,33 +12,18 @@ import (
 )
 
 // NewProject is the resolver for the newProject field.
-func (r *mutationResolver) NewProject(ctx context.Context, typeArg entities.Type, name string, description string, startDate string, endDate string) (string, error) {
+func (r *mutationResolver) NewProject(ctx context.Context, input entities.InputNewProject) (string, error) {
 	panic(fmt.Errorf("not implemented: NewProject - newProject"))
 }
 
 // UpdateProject is the resolver for the updateProject field.
-func (r *mutationResolver) UpdateProject(ctx context.Context, id string, typeArg entities.Type, name string, description string, startDate string, endDate string) (string, error) {
+func (r *mutationResolver) UpdateProject(ctx context.Context, input entities.InputUpdateProject) (string, error) {
 	panic(fmt.Errorf("not implemented: UpdateProject - updateProject"))
 }
 
 // DeleteProject is the resolver for the deleteProject field.
-func (r *mutationResolver) DeleteProject(ctx context.Context, id string) (string, error) {
+func (r *mutationResolver) DeleteProject(ctx context.Context, input entities.InputDeleteProject) (string, error) {
 	panic(fmt.Errorf("not implemented: DeleteProject - deleteProject"))
-}
-
-// NewTask is the resolver for the newTask field.
-func (r *mutationResolver) NewTask(ctx context.Context, projectID string, typeArg entities.TypeTask, name string, description string) (string, error) {
-	panic(fmt.Errorf("not implemented: NewTask - newTask"))
-}
-
-// UpdateTask is the resolver for the updateTask field.
-func (r *mutationResolver) UpdateTask(ctx context.Context, id string, typeArg entities.TypeTask, name string, description string) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdateTask - updateTask"))
-}
-
-// DeleteTask is the resolver for the deleteTask field.
-func (r *mutationResolver) DeleteTask(ctx context.Context, id string) (string, error) {
-	panic(fmt.Errorf("not implemented: DeleteTask - deleteTask"))
 }
 
 // Projects is the resolver for the projects field.

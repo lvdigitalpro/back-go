@@ -1,37 +1,61 @@
 
-enum Role {
-    ADMIN
-    USER
-    ENTERPRISE
-}
 
 type User {
-    id: String!
-    role: Role!
+    user_id: String!
     name: String!
-    lastname: String!
-    ir: String!
+    last_name: String!
+    birth_date: String!
     email: String!
     password: String!
-    enterpriseName: String
-    nrle: String
-    projects: [String!]
     createdAt: String!
     updatedAt: String
+    type: Int!
+    ir: String!
+    nrle: String
+    enterpriseName: String
+    cod_project: Int
+}
+
+input InputNewUser{
+    name: String!
+    last_name: String!
+    birth_date: String!
+    email: String!
+    password: String!
+    password_confirmation:String!
+    type: Int!
+    ir: String!
+    nrle: String
+    enterpriseName: String
+}
+
+input InputUpdateUser{
+    user_id: String!
+    name: String!
+    last_name: String!
+    birth_date: String!
+    email: String!
+    password: String!
+    password_confirmation:String!
+    type: Int!
+    ir: String!
+    created_at: String!
+    nrle: String
+    enterpriseName: String
+    old_password: String
 }
 
 
 
 type Query {
-    getUsers: [User]
-    getUser(id: String!): User!
+    getUsers: [User!]
+    getUser(user_id: String!): User!
     getUserByEmail(email: String!): User!
     getUserByIR(ir: String!): User!
-    getUserByProject(project: String!): User!
+    getUserByProject(cod_project: Int!): User!
 }
 
 type Mutation {
-    newUser(role:Role!, name: String!, lastname: String!, ir: String!, email: String!, password: String!, passwordConfirmation:String!, enterpriseName: String, nrle: String): String!
-    updateUser(id: String!, name: String, lastname: String, ir: String, email: String, password: String, passwordConfirmation:String,enterpriseName:String, nrle: String): String!
-    deleteUser(id: String!,ir: String!, nrle: String ,password:String!, passwordConfirmation:String!): String!
+    newUser(input: InputNewUser!): String!
+    updateUser(input: InputUpdateUser!): String!
 }

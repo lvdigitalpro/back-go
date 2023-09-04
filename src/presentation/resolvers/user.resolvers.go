@@ -6,19 +6,15 @@ package resolvers
 
 import (
 	"context"
+
 	"github.com/lvdigitalpro/back/src/domain/entities"
 	"github.com/lvdigitalpro/back/src/graph"
 )
 
 // NewUser is the resolver for the newUser field.
-func (r *mutationResolver) NewUser(
-	ctx context.Context, role entities.Role, name string, lastname string, ir string, email string, password string,
-	passwordConfirmation string, enterpriseName *string, nrle *string,
-) (string, error) {
+func (r *mutationResolver) NewUser(ctx context.Context, input entities.InputNewUser) (string, error) {
 	exec, err := r.UserService.NewUser(
-		ctx, role, name, lastname, ir, email, password,
-		passwordConfirmation,
-		enterpriseName, nrle,
+		ctx, input,
 	)
 
 	if err != nil {
@@ -29,28 +25,9 @@ func (r *mutationResolver) NewUser(
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(
-	ctx context.Context, id string, name *string, lastname *string, ir *string, email *string, password *string,
-	passwordConfirmation *string, enterpriseName *string, nrle *string,
-) (string, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, input entities.InputUpdateUser) (string, error) {
 	exec, err := r.UserService.UpdateUser(
-		ctx, id, *name, *lastname, *ir, *email, *password, *passwordConfirmation,
-		enterpriseName, nrle,
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	return *exec, nil
-}
-
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(
-	ctx context.Context, id string, ir string, nrle *string, password string, passwordConfirmation string,
-) (string, error) {
-	exec, err := r.UserService.DeleteUser(
-		ctx, id, ir, nrle, password, passwordConfirmation,
+		ctx, input,
 	)
 
 	if err != nil {
@@ -72,8 +49,8 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*entities.User, error) 
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, id string) (*entities.User, error) {
-	exec, err := r.UserService.GetUser(ctx, id)
+func (r *queryResolver) GetUser(ctx context.Context, userID string) (*entities.User, error) {
+	exec, err := r.UserService.GetUser(ctx, userID)
 
 	if err != nil {
 		return nil, err
@@ -105,9 +82,8 @@ func (r *queryResolver) GetUserByIr(ctx context.Context, ir string) (*entities.U
 }
 
 // GetUserByProject is the resolver for the getUserByProject field.
-func (r *queryResolver) GetUserByProject(ctx context.Context, project string) (*entities.User, error) {
-
-	exec, err := r.UserService.GetUserByProject(ctx, project)
+func (r *queryResolver) GetUserByProject(ctx context.Context, codProject int) (*entities.User, error) {
+	exec, err := r.UserService.GetUserByProject(ctx, codProject)
 
 	if err != nil {
 		return nil, err
@@ -124,10 +100,3 @@ func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -10,9 +14,6 @@ import (
 	"github.com/lvdigitalpro/back/src/infra/adapters"
 	"github.com/lvdigitalpro/back/src/infra/repositories/postgres"
 	"github.com/lvdigitalpro/back/src/presentation/resolvers"
-	"log"
-	"net/http"
-	"os"
 )
 
 func main() {

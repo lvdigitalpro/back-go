@@ -15,36 +15,38 @@ enum Type {
 }
 
 type Project {
-    id: String!
+    cod_project: Int!
     type: Type!
-    owner: User!
+    status: Status!
     name: String!
     description: String!
-    tasks: [Tasks!]
-    status: Status!
-    createdAt: String!
-    updatedAt: String!
-    startDate: String
-    endDate: String
+    created_at: String!
+    updated_at: String
+    start_date: String
+    end_date: String
+    user_id: String!
 }
 
-enum TypeTask{
-    SEARCH
-    DESIGN
-    DEVELOPMENT
-    TEST
-    OTHER
-}
-type Tasks {
-    id: String!
-    type: TypeTask!
+input InputNewProject {
+    type: Type!
     name: String!
     description: String!
-    status: String!
-    owner: User!
-    createdAt: String!
-    updatedAt: String
+    user_id: String!
 }
+
+input InputUpdateProject {
+    type: Type!
+    name: String!
+    description: String!
+    user_id: String!
+}
+
+input InputDeleteProject {
+    cod_project: Int!
+    password: String!
+    password_confirmation: String!
+}
+
 
 extend type Query {
     projects: [Project!]
@@ -52,10 +54,8 @@ extend type Query {
 }
 
 extend type Mutation {
-    newProject(type: Type!, name: String!, description: String!, startDate: String!, endDate: String!): String!
-    updateProject(id: String!, type: Type!, name: String!, description: String!, startDate: String!, endDate: String!): String!
-    deleteProject(id: String!): String!
-    newTask(projectId: String!, type: TypeTask!, name: String!, description: String!): String!
-    updateTask(id: String!, type: TypeTask!, name: String!, description: String!): String!
-    deleteTask(id: String!): String!
+    newProject(input: InputNewProject!): String!
+    updateProject(input: InputUpdateProject!): String!
+    deleteProject(input: InputDeleteProject!): String!
+   
 }
