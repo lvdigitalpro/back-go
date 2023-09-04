@@ -35,7 +35,8 @@ func main() {
 		graph.NewExecutableSchema(
 			graph.Config{
 				Resolvers: &resolvers.Resolver{
-					UserService: services.NewUserService(postgres.NewUserRepository(pgAdapter)),
+					UserService:    services.NewUserService(postgres.NewUserRepository(pgAdapter)),
+					ProjectService: services.NewProjectService(postgres.NewProjectsRepository(pgAdapter)),
 				},
 			},
 		),

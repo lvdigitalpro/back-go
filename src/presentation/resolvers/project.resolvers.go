@@ -6,32 +6,74 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/lvdigitalpro/back/src/domain/entities"
 )
 
 // NewProject is the resolver for the newProject field.
 func (r *mutationResolver) NewProject(ctx context.Context, input entities.InputNewProject) (string, error) {
-	panic(fmt.Errorf("not implemented: NewProject - newProject"))
+
+	exec, err := r.ProjectService.NewProject(ctx, input)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
 }
 
 // UpdateProject is the resolver for the updateProject field.
 func (r *mutationResolver) UpdateProject(ctx context.Context, input entities.InputUpdateProject) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdateProject - updateProject"))
+
+	exec, err := r.ProjectService.UpdateProject(ctx, input)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
+
 }
 
 // DeleteProject is the resolver for the deleteProject field.
 func (r *mutationResolver) DeleteProject(ctx context.Context, input entities.InputDeleteProject) (string, error) {
-	panic(fmt.Errorf("not implemented: DeleteProject - deleteProject"))
+
+	exec, err := r.ProjectService.DeleteProject(ctx, input)
+
+	if err != nil {
+		return "", err
+	}
+
+	return *exec, nil
 }
 
-// Projects is the resolver for the projects field.
-func (r *queryResolver) Projects(ctx context.Context) ([]*entities.Project, error) {
-	panic(fmt.Errorf("not implemented: Projects - projects"))
+// GetProjects is the resolver for the getProjects field.
+func (r *queryResolver) GetProjects(ctx context.Context) ([]*entities.Project, error) {
+
+	projects, err := r.ProjectService.GetProjects(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
-// Project is the resolver for the project field.
-func (r *queryResolver) Project(ctx context.Context, id string) (*entities.Project, error) {
-	panic(fmt.Errorf("not implemented: Project - project"))
+// GetProject is the resolver for the getProject field.
+func (r *queryResolver) GetProject(ctx context.Context, codProject int) (*entities.Project, error) {
+
+	project, err := r.ProjectService.GetProject(ctx, codProject)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
 }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.

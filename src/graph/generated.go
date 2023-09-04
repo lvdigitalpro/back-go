@@ -66,13 +66,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetProject       func(childComplexity int, codProject int) int
+		GetProjects      func(childComplexity int) int
 		GetUser          func(childComplexity int, userID string) int
 		GetUserByEmail   func(childComplexity int, email string) int
 		GetUserByIr      func(childComplexity int, ir string) int
 		GetUserByProject func(childComplexity int, codProject int) int
 		GetUsers         func(childComplexity int) int
-		Project          func(childComplexity int, id string) int
-		Projects         func(childComplexity int) int
 	}
 
 	User struct {
@@ -105,8 +105,8 @@ type QueryResolver interface {
 	GetUserByEmail(ctx context.Context, email string) (*entities.User, error)
 	GetUserByIr(ctx context.Context, ir string) (*entities.User, error)
 	GetUserByProject(ctx context.Context, codProject int) (*entities.User, error)
-	Projects(ctx context.Context) ([]*entities.Project, error)
-	Project(ctx context.Context, id string) (*entities.Project, error)
+	GetProjects(ctx context.Context) ([]*entities.Project, error)
+	GetProject(ctx context.Context, codProject int) (*entities.Project, error)
 }
 
 type executableSchema struct {
@@ -254,6 +254,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Project.UserID(childComplexity), true
 
+	case "Query.getProject":
+		if e.complexity.Query.GetProject == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProject_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProject(childComplexity, args["cod_project"].(int)), true
+
+	case "Query.getProjects":
+		if e.complexity.Query.GetProjects == nil {
+			break
+		}
+
+		return e.complexity.Query.GetProjects(childComplexity), true
+
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
 			break
@@ -308,25 +327,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetUsers(childComplexity), true
-
-	case "Query.project":
-		if e.complexity.Query.Project == nil {
-			break
-		}
-
-		args, err := ec.field_Query_project_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Project(childComplexity, args["id"].(string)), true
-
-	case "Query.projects":
-		if e.complexity.Query.Projects == nil {
-			break
-		}
-
-		return e.complexity.Query.Projects(childComplexity), true
 
 	case "User.birth_date":
 		if e.complexity.User.BirthDate == nil {
@@ -569,7 +569,7 @@ input InputUpdateProject {
     type: Type!
     name: String!
     description: String!
-    user_id: String!
+    cod_project: Int!
 }
 
 input InputDeleteProject {
@@ -580,8 +580,8 @@ input InputDeleteProject {
 
 
 extend type Query {
-    projects: [Project!]
-    project(id: String!): Project!
+    getProjects: [Project!]
+    getProject(cod_project: Int!): Project!
 }
 
 extend type Mutation {
@@ -748,6 +748,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getProject_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["cod_project"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cod_project"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["cod_project"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getUserByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -805,21 +820,6 @@ func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArg
 		}
 	}
 	args["user_id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_project_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
 	return args, nil
 }
 
@@ -1968,8 +1968,8 @@ func (ec *executionContext) fieldContext_Query_getUserByProject(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_projects(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_projects(ctx, field)
+func (ec *executionContext) _Query_getProjects(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getProjects(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1982,7 +1982,7 @@ func (ec *executionContext) _Query_projects(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Projects(rctx)
+		return ec.resolvers.Query().GetProjects(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1996,7 +1996,7 @@ func (ec *executionContext) _Query_projects(ctx context.Context, field graphql.C
 	return ec.marshalOProject2ᚕᚖgithubᚗcomᚋlvdigitalproᚋbackᚋsrcᚋdomainᚋentitiesᚐProjectᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_projects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getProjects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2031,8 +2031,8 @@ func (ec *executionContext) fieldContext_Query_projects(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_project(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_project(ctx, field)
+func (ec *executionContext) _Query_getProject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getProject(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2045,7 +2045,7 @@ func (ec *executionContext) _Query_project(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Project(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().GetProject(rctx, fc.Args["cod_project"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2062,7 +2062,7 @@ func (ec *executionContext) _Query_project(ctx context.Context, field graphql.Co
 	return ec.marshalNProject2ᚖgithubᚗcomᚋlvdigitalproᚋbackᚋsrcᚋdomainᚋentitiesᚐProject(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_project(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getProject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2101,7 +2101,7 @@ func (ec *executionContext) fieldContext_Query_project(ctx context.Context, fiel
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_project_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_getProject_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4790,7 +4790,7 @@ func (ec *executionContext) unmarshalInputInputUpdateProject(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"type", "name", "description", "user_id"}
+	fieldsInOrder := [...]string{"type", "name", "description", "cod_project"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4824,15 +4824,15 @@ func (ec *executionContext) unmarshalInputInputUpdateProject(ctx context.Context
 				return it, err
 			}
 			it.Description = data
-		case "user_id":
+		case "cod_project":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cod_project"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.UserID = data
+			it.CodProject = data
 		}
 	}
 
@@ -5262,7 +5262,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "projects":
+		case "getProjects":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5271,7 +5271,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_projects(ctx, field)
+				res = ec._Query_getProjects(ctx, field)
 				return res
 			}
 
@@ -5281,7 +5281,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "project":
+		case "getProject":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5290,7 +5290,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_project(ctx, field)
+				res = ec._Query_getProject(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

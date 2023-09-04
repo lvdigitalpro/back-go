@@ -12,7 +12,8 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	UserService services.IUserService
+	UserService    services.IUserService
+	ProjectService services.IProjectService
 }
 
 func (r *Resolver) Entity() generated.EntityResolver {

@@ -38,7 +38,7 @@ input InputUpdateProject {
     type: Type!
     name: String!
     description: String!
-    user_id: String!
+    cod_project: Int!
 }
 
 input InputDeleteProject {
@@ -49,8 +49,8 @@ input InputDeleteProject {
 
 
 extend type Query {
-    projects: [Project!]
-    project(id: String!): Project!
+    getProjects: [Project!]
+    getProject(cod_project: Int!): Project!
 }
 
 extend type Mutation {

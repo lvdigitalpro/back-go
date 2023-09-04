@@ -38,7 +38,7 @@ type InputUpdateProject struct {
 	Type        Type   `json:"type"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	UserID      string `json:"user_id"`
+	CodProject  int    `json:"cod_project"`
 }
 
 type InputUpdateUser struct {

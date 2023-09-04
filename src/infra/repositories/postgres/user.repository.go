@@ -110,163 +110,145 @@ func (r *UserRepository) UpdateUser(
 }
 
 func (r *UserRepository) GetUsers(ctx context.Context) ([]*contracts.UserContract, error) {
-	// tx, err := r.DB.BeginTx(ctx, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tx, err := r.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 
-	// prepare, err := tx.PrepareContext(ctx, "select * from back.users")
+	prepare, err := tx.PrepareContext(ctx, "select * from platform.users")
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// rows, err := tx.StmtContext(ctx, prepare).Query()
+	rows, err := tx.StmtContext(ctx, prepare).Query()
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
 	var users []*contracts.UserContract
 
-	// for rows.Next() {
-	// 	var user contracts.UserContract
-	// 	err = rows.Scan(
-	// 		&user.ID, &user.Role, &user.Name, &user.Lastname, &user.Ir, &user.Email, &user.Password,
-	// 		&user.EnterpriseName, &user.Nrle, pq.Array(user.Projects), &user.CreatedAt, &user.UpdatedAt,
-	// 	)
+	for rows.Next() {
+		var user contracts.UserContract
+		err = rows.Scan(&user.UserID, &user.Name, &user.LastName, &user.BirthDate, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.Type, &user.Ir, &user.Nrle, &user.EnterpriseName, &user.CodProject)
 
-	// 	user.Password = ""
+		user.Password = ""
 
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
 
-	// 	users = append(users, &user)
-	// }
+		users = append(users, &user)
+	}
 
-	// err = rows.Close()
+	err = rows.Close()
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// err = tx.Commit()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tx.Commit()
 
 	return users, nil
 }
 func (r *UserRepository) GetUser(ctx context.Context, user_id string) (*contracts.UserContract, error) {
-	// tx, err := r.DB.BeginTx(ctx, nil)
+	tx, err := r.DB.BeginTx(ctx, nil)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 
-	// prepare, err := tx.PrepareContext(ctx, "select * from back.users where id = $1")
+	prepare, err := tx.PrepareContext(ctx, "select * from platform.users where id = $1")
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// row := tx.StmtContext(ctx, prepare).QueryRow(id)
+	row := tx.StmtContext(ctx, prepare).QueryRow(user_id)
 
 	var user contracts.UserContract
 
-	// err = row.Scan(
-	// 	&user.ID, &user.Role, &user.Name, &user.Lastname, &user.Ir, &user.Email, &user.Password, &user.EnterpriseName,
-	// 	&user.Nrle, pq.Array(user.Projects), &user.CreatedAt, &user.UpdatedAt,
-	// )
+	err = row.Scan(&user.UserID, &user.Name, &user.LastName, &user.BirthDate, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.Type, &user.Ir, &user.Nrle, &user.EnterpriseName, &user.CodProject)
 
-	// user.Password = ""
+	user.Password = ""
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// err = tx.Commit()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tx.Commit()
 
 	return &user, nil
 
 }
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*contracts.UserContract, error) {
-	// tx, err := r.DB.BeginTx(ctx, nil)
+	tx, err := r.DB.BeginTx(ctx, nil)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 
-	// prepare, err := tx.PrepareContext(ctx, "select * from back.users where email = $1")
+	prepare, err := tx.PrepareContext(ctx, "select * from platform.users where email = $1")
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// row := tx.StmtContext(ctx, prepare).QueryRow(email)
+	row := tx.StmtContext(ctx, prepare).QueryRow(email)
 
 	user := contracts.UserContract{}
 
-	// err = row.Scan(
-	// 	&user.ID, &user.Role, &user.Name, &user.Lastname, &user.Ir, &user.Email, &user.Password,
-	// 	&user.EnterpriseName, &user.Nrle, pq.Array(user.Projects), &user.CreatedAt, &user.UpdatedAt,
-	// )
+	err = row.Scan(&user.UserID, &user.Name, &user.LastName, &user.BirthDate, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.Type, &user.Ir, &user.Nrle, &user.EnterpriseName, &user.CodProject)
 
-	// user.Password = ""
+	user.Password = ""
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// err = tx.Commit()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tx.Commit()
 
 	return &user, nil
 
 }
 func (r *UserRepository) GetUserByIr(ctx context.Context, ir string) (*contracts.UserContract, error) {
-	// tx, err := r.DB.BeginTx(ctx, nil)
+	tx, err := r.DB.BeginTx(ctx, nil)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 
-	// prepare, err := tx.PrepareContext(ctx, "select * from back.users where ir = $1")
+	prepare, err := tx.PrepareContext(ctx, "select * from platform.users where ir = $1")
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-	// row := tx.StmtContext(ctx, prepare).QueryRow(ir)
+	row := tx.StmtContext(ctx, prepare).QueryRow(ir)
 
 	user := contracts.UserContract{}
 
-	// err = row.Scan(
-	// 	&user.ID, &user.Role, &user.Name, &user.Lastname, &user.Ir, &user.Email, &user.Password, &user.EnterpriseName,
-	// 	&user.Nrle, pq.Array(user.Projects), &user.CreatedAt, &user.UpdatedAt,
-	// )
+	err = row.Scan(&user.UserID, &user.Name, &user.LastName, &user.BirthDate, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.Type, &user.Ir, &user.Nrle, &user.EnterpriseName, &user.CodProject)
 
-	// user.Password = ""
+	user.Password = ""
 
-	// if err != nil {
-	// 	return nil, err
+	if err != nil {
+		tx.Rollback()
+		return nil, err
 
-	// }
+	}
 
-	// err = tx.Commit()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
+	tx.Commit()
 
 	return &user, nil
 }
