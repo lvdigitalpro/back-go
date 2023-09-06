@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -108,7 +107,6 @@ func Validate(ctx context.Context, token string) (*jwt.Token, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		secret := []byte(os.Getenv("SECRET_AT"))
-		fmt.Println(secret)
 		return secret, nil
 
 	})

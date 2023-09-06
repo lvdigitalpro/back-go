@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/lvdigitalpro/back/src/data/services"
@@ -25,7 +24,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		validate, err := services.Validate(context.Background(), auth)
 
 		if err != nil || !validate.Valid {
-			fmt.Println(validate.Valid)
 			http.Error(w, "Invalid token", http.StatusForbidden)
 			return
 		}
