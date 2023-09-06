@@ -14,6 +14,7 @@ import (
 type Resolver struct {
 	UserService    services.IUserService
 	ProjectService services.IProjectService
+	AuthService    services.IAuthService
 }
 
 func (r *Resolver) Entity() generated.EntityResolver {

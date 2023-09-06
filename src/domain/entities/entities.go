@@ -8,6 +8,12 @@ import (
 	"strconv"
 )
 
+type AuthPayload struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	User         *User  `json:"user"`
+}
+
 type InputDeleteProject struct {
 	CodProject           int    `json:"cod_project"`
 	Password             string `json:"password"`

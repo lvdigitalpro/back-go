@@ -12,7 +12,6 @@ import (
 
 // NewProject is the resolver for the newProject field.
 func (r *mutationResolver) NewProject(ctx context.Context, input entities.InputNewProject) (string, error) {
-
 	exec, err := r.ProjectService.NewProject(ctx, input)
 
 	if err != nil {
@@ -24,7 +23,6 @@ func (r *mutationResolver) NewProject(ctx context.Context, input entities.InputN
 
 // UpdateProject is the resolver for the updateProject field.
 func (r *mutationResolver) UpdateProject(ctx context.Context, input entities.InputUpdateProject) (string, error) {
-
 	exec, err := r.ProjectService.UpdateProject(ctx, input)
 
 	if err != nil {
@@ -32,12 +30,10 @@ func (r *mutationResolver) UpdateProject(ctx context.Context, input entities.Inp
 	}
 
 	return *exec, nil
-
 }
 
 // DeleteProject is the resolver for the deleteProject field.
 func (r *mutationResolver) DeleteProject(ctx context.Context, input entities.InputDeleteProject) (string, error) {
-
 	exec, err := r.ProjectService.DeleteProject(ctx, input)
 
 	if err != nil {
@@ -49,7 +45,6 @@ func (r *mutationResolver) DeleteProject(ctx context.Context, input entities.Inp
 
 // GetProjects is the resolver for the getProjects field.
 func (r *queryResolver) GetProjects(ctx context.Context) ([]*entities.Project, error) {
-
 	projects, err := r.ProjectService.GetProjects(ctx)
 
 	if err != nil {
@@ -61,7 +56,6 @@ func (r *queryResolver) GetProjects(ctx context.Context) ([]*entities.Project, e
 
 // GetProject is the resolver for the getProject field.
 func (r *queryResolver) GetProject(ctx context.Context, codProject int) (*entities.Project, error) {
-
 	project, err := r.ProjectService.GetProject(ctx, codProject)
 
 	if err != nil {
@@ -70,10 +64,3 @@ func (r *queryResolver) GetProject(ctx context.Context, codProject int) (*entiti
 
 	return project, nil
 }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.

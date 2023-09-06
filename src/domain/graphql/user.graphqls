@@ -57,5 +57,5 @@ type Query {
 
 type Mutation {
     newUser(input: InputNewUser!): String!
-    updateUser(input: InputUpdateUser!): String!
+    updateUser(input: InputUpdateUser!): String! @auth
 }
