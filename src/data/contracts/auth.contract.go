@@ -10,4 +10,5 @@ type AuthResponse struct {
 
 type IAuthRepository interface {
 	Login(ctx context.Context, email string, password string) (*AuthResponse, error)
+	RefreshToken(ctx context.Context, user_id string) (*AuthResponse, error)
 }

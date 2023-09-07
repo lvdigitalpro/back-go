@@ -7,4 +7,5 @@ type AuthPayload {
 }
 extend type Mutation {
   login(email: String!, password: String!): AuthPayload!
+  refresh_token(refresh_token: String!): AuthPayload!
 }

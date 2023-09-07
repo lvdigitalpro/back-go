@@ -24,3 +24,18 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 		User:         &exec.User,
 	}, nil
 }
+
+// RefreshToken is the resolver for the refresh_token field.
+func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string) (*entities.AuthPayload, error) {
+	exec, err := r.AuthService.RefreshToken(ctx, refreshToken)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.AuthPayload{
+		AccessToken:  exec.AccessToken,
+		RefreshToken: exec.RefreshToken,
+		User:         &exec.User,
+	}, nil
+}

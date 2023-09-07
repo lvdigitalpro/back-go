@@ -12,6 +12,7 @@ import (
 
 type IAuthService interface {
 	Login(ctx context.Context, email string, password string) (*contracts.AuthResponse, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*contracts.AuthResponse, error)
 }
 
 type AuthService struct {
@@ -39,67 +40,27 @@ func (r *AuthService) Login(ctx context.Context, email string, password string) 
 	return exec, nil
 }
 
-// func (r *AuthService) Login(ctx context.Context, email string, password string) (*contracts.AuthResponse, error) {
+func (r *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*contracts.AuthResponse, error) {
 
-// 	user, err := r.UserService.GetUserByEmail(ctx, email)
+	validate, err := ValidateRT(ctx, refreshToken)
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	if err != nil || !validate.Valid {
+		return nil, errors.New("invalid token")
+	}
 
-// 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	customClaim, _ := validate.Claims.(*Claims)
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	exec, err := r.AuthRepository.RefreshToken(ctx, customClaim.UserID)
 
-// 	claimsRefreshToken := &Claims{
-// 		user.UserID,
-// 		jwt.RegisteredClaims{
-// 			ID:        uuid.UUIDv4(),
-// 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour * 7)),
-// 			NotBefore: jwt.NewNumericDate(time.Now()),
-// 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-// 			Issuer:    "lvdigitalpro",
-// 			Subject:   "loginRT",
-// 		},
-// 	}
+	if err != nil {
+		return nil, err
+	}
 
-// 	claimsAccessToken := &Claims{
-// 		user.UserID,
-// 		jwt.RegisteredClaims{
-// 			ID:        uuid.UUIDv4(),
-// 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
-// 			NotBefore: jwt.NewNumericDate(time.Now()),
-// 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-// 			Issuer:    "lvdigitalpro",
-// 			Subject:   "loginAT",
-// 		},
-// 	}
+	return exec, nil
 
-// 	acTk := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claimsAccessToken)
+}
 
-// 	accessToken, err := acTk.SignedString(os.Getenv("ACCESS_TOKEN_SECRET"))
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	rfTk := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claimsRefreshToken)
-
-// 	refreshToken, err := rfTk.SignedString(os.Getenv("REFRESH_TOKEN_SECRET"))
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &contracts.AuthResponse{
-// 		AccessToken:  accessToken,
-// 		RefreshToken: refreshToken,
-// 	}, nil
-// }
-
-func Validate(ctx context.Context, token string) (*jwt.Token, error) {
+func ValidateAT(ctx context.Context, token string) (*jwt.Token, error) {
 
 	return jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 
@@ -107,6 +68,20 @@ func Validate(ctx context.Context, token string) (*jwt.Token, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		secret := []byte(os.Getenv("SECRET_AT"))
+		return secret, nil
+
+	})
+
+}
+
+func ValidateRT(ctx context.Context, token string) (*jwt.Token, error) {
+
+	return jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+
+		if _, mt := token.Method.(*jwt.SigningMethodHMAC); !mt {
+			return nil, errors.New("unexpected signing method")
+		}
+		secret := []byte(os.Getenv("SECRET_RT"))
 		return secret, nil
 
 	})
@@ -136,7 +111,7 @@ func JwtGenerateAT(ctx context.Context, userID string) (string, error) {
 	claimsRefreshToken := &Claims{
 		userID,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		}}

@@ -21,7 +21,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		bearer := "Bearer "
 		auth = auth[len(bearer):]
 
-		validate, err := services.Validate(context.Background(), auth)
+		validate, err := services.ValidateAT(context.Background(), auth)
 
 		if err != nil || !validate.Valid {
 			http.Error(w, "Invalid token", http.StatusForbidden)

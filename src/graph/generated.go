@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 		Login         func(childComplexity int, email string, password string) int
 		NewProject    func(childComplexity int, input entities.InputNewProject) int
 		NewUser       func(childComplexity int, input entities.InputNewUser) int
+		RefreshToken  func(childComplexity int, refreshToken string) int
 		UpdateProject func(childComplexity int, input entities.InputUpdateProject) int
 		UpdateUser    func(childComplexity int, input entities.InputUpdateUser) int
 	}
@@ -104,6 +105,7 @@ type MutationResolver interface {
 	NewUser(ctx context.Context, input entities.InputNewUser) (string, error)
 	UpdateUser(ctx context.Context, input entities.InputUpdateUser) (string, error)
 	Login(ctx context.Context, email string, password string) (*entities.AuthPayload, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*entities.AuthPayload, error)
 	NewProject(ctx context.Context, input entities.InputNewProject) (string, error)
 	UpdateProject(ctx context.Context, input entities.InputUpdateProject) (string, error)
 	DeleteProject(ctx context.Context, input entities.InputDeleteProject) (string, error)
@@ -201,6 +203,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.NewUser(childComplexity, args["input"].(entities.InputNewUser)), true
+
+	case "Mutation.refresh_token":
+		if e.complexity.Mutation.RefreshToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_refresh_token_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RefreshToken(childComplexity, args["refresh_token"].(string)), true
 
 	case "Mutation.updateProject":
 		if e.complexity.Mutation.UpdateProject == nil {
@@ -580,6 +594,7 @@ type AuthPayload {
 }
 extend type Mutation {
   login(email: String!, password: String!): AuthPayload!
+  refresh_token(refresh_token: String!): AuthPayload!
 }`, BuiltIn: false},
 	{Name: "../domain/graphql/project.graphqls", Input: `enum Status{
     QUEUE
@@ -776,6 +791,21 @@ func (ec *executionContext) field_Mutation_newUser_args(ctx context.Context, raw
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_refresh_token_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["refresh_token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refresh_token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["refresh_token"] = arg0
 	return args, nil
 }
 
@@ -1284,6 +1314,69 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_login_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_refresh_token(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_refresh_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RefreshToken(rctx, fc.Args["refresh_token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*entities.AuthPayload)
+	fc.Result = res
+	return ec.marshalNAuthPayload2ᚖgithubᚗcomᚋlvdigitalproᚋbackᚋsrcᚋdomainᚋentitiesᚐAuthPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_refresh_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "access_token":
+				return ec.fieldContext_AuthPayload_access_token(ctx, field)
+			case "refresh_token":
+				return ec.fieldContext_AuthPayload_refresh_token(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthPayload_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AuthPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_refresh_token_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5388,6 +5481,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "login":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_login(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "refresh_token":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_refresh_token(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
