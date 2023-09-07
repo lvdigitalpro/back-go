@@ -42,6 +42,9 @@ func (r *AuthService) Login(ctx context.Context, email string, password string) 
 
 func (r *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*contracts.AuthResponse, error) {
 
+	bearer := "Bearer "
+	refreshToken = refreshToken[len(bearer):]
+
 	validate, err := ValidateRT(ctx, refreshToken)
 
 	if err != nil || !validate.Valid {
