@@ -48,11 +48,11 @@ input InputUpdateUser{
 
 
 type Query {
-    getUsers: [User!]
-    getUser(user_id: String!): User!
+    getUsers: [User!] @auth
+    getUser(user_id: String!): User! @auth
     getUserByEmail(email: String!): User!
-    getUserByIR(ir: String!): User!
-    getUserByProject(cod_project: Int!): User!
+    getUserByIR(ir: String!): User! @auth
+    getUserByProject(cod_project: Int!): User! @auth
 }
 
 type Mutation {

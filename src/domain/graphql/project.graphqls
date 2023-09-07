@@ -49,13 +49,13 @@ input InputDeleteProject {
 
 
 extend type Query {
-    getProjects: [Project!]
-    getProject(cod_project: Int!): Project!
+    getProjects: [Project!] @auth
+    getProject(cod_project: Int!): Project! @auth
 }
 
 extend type Mutation {
-    newProject(input: InputNewProject!): String!
-    updateProject(input: InputUpdateProject!): String!
-    deleteProject(input: InputDeleteProject!): String!
+    newProject(input: InputNewProject!): String! @auth
+    updateProject(input: InputUpdateProject!): String! @auth
+    deleteProject(input: InputDeleteProject!): String! @auth
    
 }
